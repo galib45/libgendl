@@ -42,6 +42,7 @@ export default class App extends Component {
 	};
 
 	search = () => {
+		this.setState({filesFound:'', results:null});
 		console.log('Searching... '+this.state.url);
 		let parser = new DOMParser();
 		fetch(this.state.url)
@@ -50,12 +51,15 @@ export default class App extends Component {
 				//console.log(html);
 				let htmlDoc = parser.parseFromString(html, 'text/html');
 				let filesFound = htmlDoc.querySelector('font[color=grey]').innerHTML;
-				let results = htmlDoc.querySelectorAll('body > table[rules=cols]');
-				let resultsArray = Array.from(results);
-				let data = results[0].querySelectorAll('td');
-				results = resultsArray.map( item => (
-					this.resultObject(results[resultsArray.indexOf(item)].querySelectorAll('td'))
-				));
+				let results = null;
+				if(filesFound[0] != '0') {
+					results = htmlDoc.querySelectorAll('body > table[rules=cols]');
+					let resultsArray = Array.from(results);
+					let data = results[0].querySelectorAll('td');
+					results = resultsArray.map( item => (
+						this.resultObject(results[resultsArray.indexOf(item)].querySelectorAll('td'))
+					));
+				}
 				//console.log(results);
 				//console.log(filesFound);
 				this.setState({filesFound, results});
