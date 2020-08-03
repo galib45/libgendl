@@ -5,7 +5,8 @@ import './App.css';
 
 export default class App extends Component {
 	
-	baseUrl = new URL('https://cors-anywhere.herokuapp.com/http://gen.lib.rus.ec/search.php');
+	//https://cors-anywhere.herokuapp.com/
+	baseUrl = new URL('http://gen.lib.rus.ec/search.php');
 	state = {
 		searchText: '',
 		url: '',

@@ -17,6 +17,7 @@ export default class ResultView extends Component {
                         resultItem.link.search('/get'), 
                         resultItem.link.search('"><img')
                     );
+                    link = link.replace('&amp;', '&');
                     let img = baseUrl + resultItem.link.substring(
                         resultItem.link.search('img src')+9, 
                         resultItem.link.search('" border')
