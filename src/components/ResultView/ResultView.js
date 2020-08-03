@@ -45,11 +45,18 @@ export default class ResultView extends Component {
                     );
                 })
         }
+
+        let spinner = <p></p>;
+        if(this.props.loading == true) {
+            spinner = <div className="spinner"></div>
+        }
+
         return (
             <React.Fragment>
             <div className="result-count">
                 <p>{this.props.filesFound}</p>
             </div>
+            {spinner}
             {view}
             </React.Fragment>
         );

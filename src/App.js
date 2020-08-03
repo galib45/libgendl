@@ -11,18 +11,21 @@ export default class App extends Component {
 		searchText: '',
 		url: '',
 		filesFound: '',
-		results: null
+		results: null,
+		loading: false,
+		buttonDisabled: true,
 	};
 
 	handleInput = (event) => {
 		this.setState({searchText: event.target.value});
 		if (event.target.value == '') {
-			this.setState({url: ''});
+			this.setState({url: '', buttonDisabled:true});
 		} else {
 			let url = this.baseUrl;
 			url.searchParams.set('req', event.target.value);
 			url.searchParams.set('view', 'detailed');
 			this.setState({url: url.href});
+			this.setState({buttonDisabled: false});
 		}
 	};
 
@@ -42,7 +45,10 @@ export default class App extends Component {
 	};
 
 	search = () => {
-		this.setState({filesFound:'', results:null});
+		this.setState({
+			filesFound: '', results: null,
+			loading: true, buttonDisabled: true
+		});
 		console.log('Searching... '+this.state.url);
 		let parser = new DOMParser();
 		fetch(this.state.url)
@@ -62,9 +68,14 @@ export default class App extends Component {
 				}
 				//console.log(results);
 				//console.log(filesFound);
+				this.setState({loading: false, buttonDisabled:false});
 				this.setState({filesFound, results});
 				//this.setState({htmlDoc: parser.parseFromString(html, 'text/html')});
-			}).catch((err) => { console.log(err); });
+			}).catch((err) => { 
+				this.setState({loading: false, buttonDisabled:false});
+				console.log('Error: ', err);
+				alert('Error: ' + err);
+			});
 	};
 	
 	render() {
@@ -73,12 +84,13 @@ export default class App extends Component {
 				<SearchBar
 					inputValue = {this.state.searchText}
 					onInputChange = {this.handleInput}
-					buttonDisabled = {!this.state.url}
+					buttonDisabled = {this.state.buttonDisabled}
 					onButtonClick = {this.search}
 				/>
 				<ResultView
 					filesFound = {this.state.filesFound}
 					resultData = {this.state.results}
+					loading = {this.state.loading}
 				/>
 			</div>
 		);
