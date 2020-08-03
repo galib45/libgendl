@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "homepage": "https://galib45.github.io/libgendl",
+  "homepage": "http://galib45.github.io/libgendl",
   "scripts": {
     "dev": "webpack --mode development",
     "prod": "webpack --mode production"

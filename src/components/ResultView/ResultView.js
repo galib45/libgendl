@@ -43,7 +43,7 @@ export default class ResultView extends Component {
                     return (
                         <ResultItem item={item}/>
                     );
-                })
+                });
         }
 
         let spinner = <p></p>;

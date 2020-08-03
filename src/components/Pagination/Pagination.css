@@ -1,0 +1,38 @@
+.pagination {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    font-size: 1rem;
+}
+
+button {
+    border: none;
+}
+
+.page:hover > button {
+    background-color: darkblue;
+}
+
+button:focus {
+    outline: none;
+}
+
+.page > button {
+    float: left;
+    margin: 0.3rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background-color: #6475ed;
+    height: 40px;
+    color: white;
+}
+
+.page.number > button {
+    padding: 0.5rem;
+    width: 40px;
+    border-radius: 50%;
+}
+
+.page.active > button {
+    background-color: darkblue;
+}

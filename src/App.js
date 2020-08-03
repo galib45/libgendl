@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import SearchBar from './components/SearchBar/SearchBar';
 import ResultView from './components/ResultView/ResultView';
+import Pagination from './components/Pagination/Pagination';
 import './App.css';
 
 export default class App extends Component {
 	
 	//https://cors-anywhere.herokuapp.com/
-	baseUrl = new URL('https://cors-anywhere.herokuapp.com/http://gen.lib.rus.ec/search.php');
+	baseUrl = new URL('http://gen.lib.rus.ec/search.php');
 	state = {
 		searchText: '',
 		url: '',
 		filesFound: '',
+		pages: null,
+		currentPage: 1,
 		results: null,
 		loading: false,
 		buttonDisabled: true,
@@ -44,41 +47,94 @@ export default class App extends Component {
 		};
 	};
 
-	search = () => {
-		this.setState({
-			filesFound: '', results: null,
-			loading: true, buttonDisabled: true
-		});
-		console.log('Searching... '+this.state.url);
+	parseHtml = (html) => {
+		//console.log(html);
 		let parser = new DOMParser();
-		fetch(this.state.url)
+		let htmlDoc = parser.parseFromString(html, 'text/html');
+		let filesFound = htmlDoc.querySelector('font[color=grey]').innerHTML;
+		let resultCount = parseInt(filesFound);
+		let resultPages = Math.ceil(resultCount / 25);
+		if (resultPages > 1) {
+		    let pages = [];
+		    for (let i = 1; i <= resultPages; i++) {
+		        let active = false;
+		        if (i == this.state.currentPage) {
+		            active = true;
+		        }
+		        pages.push({ name: i, active: active });
+		    }
+		    this.setState({ pages });
+		}
+		let results = null;
+		if (filesFound[0] != '0') {
+		    results = htmlDoc.querySelectorAll('body > table[rules=cols]');
+		    let resultsArray = Array.from(results);
+		    let data = results[0].querySelectorAll('td');
+		    results = resultsArray.map(item => (
+		        this.resultObject(results[resultsArray.indexOf(item)].querySelectorAll('td'))
+		    ));
+		}
+		//console.log(results);
+		//console.log(filesFound);
+		this.setState({
+		    loading: false,
+		    buttonDisabled: false,
+		    filesFound,
+		    results
+		});
+	};
+
+	searchBook = (url) => {
+		console.log('Searching... ' + url);
+		fetch(url)
 			.then(res => res.text())
 			.then((html) => { 
-				//console.log(html);
-				let htmlDoc = parser.parseFromString(html, 'text/html');
-				let filesFound = htmlDoc.querySelector('font[color=grey]').innerHTML;
-				let results = null;
-				if(filesFound[0] != '0') {
-					results = htmlDoc.querySelectorAll('body > table[rules=cols]');
-					let resultsArray = Array.from(results);
-					let data = results[0].querySelectorAll('td');
-					results = resultsArray.map( item => (
-						this.resultObject(results[resultsArray.indexOf(item)].querySelectorAll('td'))
-					));
-				}
-				//console.log(results);
-				//console.log(filesFound);
-				this.setState({loading: false, buttonDisabled:false});
-				this.setState({filesFound, results});
-				//this.setState({htmlDoc: parser.parseFromString(html, 'text/html')});
+				this.parseHtml(html);
 			}).catch((err) => { 
 				this.setState({loading: false, buttonDisabled:false});
 				console.log('Error: ', err);
 				alert('Error: ' + err);
 			});
 	};
+
+	search = () => {
+		this.setState({
+			filesFound: '', results: null,
+			loading: true, buttonDisabled: true
+		});
+		this.searchBook(this.state.url);
+	};
+
+	back = () => {
+		console.log('go back');
+	};
+
+	next = () => {
+		console.log('go to next page');
+	};
+
+	numberedPage = (event) => {
+		let button = event.target.textContent;
+		let url = this.state.url + '&page=' + button;
+		console.log(url);
+		this.setState({
+			filesFound: '', results: null,
+			loading: true, buttonDisabled: true,
+			currentPage: parseInt(button)
+		});
+		this.searchBook(url);
+	};
 	
 	render() {
+		let pages = <p></p>;
+		if(this.state.pages) {
+			pages = <Pagination 
+						pages={this.state.pages} 
+						currentPage={this.state.currentPage}
+						back={this.back} next={this.next}
+						numberedPage={this.numberedPage}
+					/>;
+		}
 		return (
 			<div>
 				<SearchBar
@@ -91,7 +147,9 @@ export default class App extends Component {
 					filesFound = {this.state.filesFound}
 					resultData = {this.state.results}
 					loading = {this.state.loading}
+					onNextClick = {this.next}
 				/>
+				{pages}
 			</div>
 		);
 	}
